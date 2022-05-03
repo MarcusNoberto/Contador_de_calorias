@@ -10,22 +10,22 @@ from datetime import date
 from datetime import datetime
 from .filters import FoodFilter
 
-#home page view
+# Home page
 @login_required(login_url='login')
 def HomePageView(request):
 
-	#taking the latest profile object
+	#Pegando o ultimo objeto do profile como exemplo
 	calories = Profile.objects.filter(person_of=request.user).last()
 	calorie_goal = calories.calorie_goal
 	
-	#creating one profile each day
+	#Criando uma profile pra cada dia
 	if date.today() > calories.date:
 		profile=Profile.objects.create(person_of=request.user)
 		profile.save()
 
 	calories = Profile.objects.filter(person_of=request.user).last()
 		
-	# showing all food consumed present day
+	# Mostrando as comidas comidas todos os dias
 
 	all_food_today=PostFood.objects.filter(profile=calories)
 	
@@ -105,9 +105,9 @@ def select_food(request):
 	context = {'form':form,'food_items':food_items}
 	return render(request, 'select_food.html',context)
 
-#for adding new food
+#Adicionando novas comidas
 def add_food(request):
-	#for showing all food items available
+	#Mostrando as comidas disponíveis
 	food_items = Food.objects.filter(person_of=request.user)
 	form = AddFoodForm(request.POST) 
 	if request.method == 'POST':
@@ -119,13 +119,13 @@ def add_food(request):
 			return redirect('add_food')
 	else:
 		form = AddFoodForm()
-	#for filtering food
+	#Filtrando as comidas
 	myFilter = FoodFilter(request.GET,queryset=food_items)
 	food_items = myFilter.qs
 	context = {'form':form,'food_items':food_items,'myFilter':myFilter}
 	return render(request,'add_food.html',context)
 
-#for updating food given by the user
+#Fazendo update das comidas
 @login_required
 def update_food(request,pk):
 	food_items = Food.objects.filter(person_of=request.user)
@@ -142,7 +142,7 @@ def update_food(request,pk):
 
 	return render(request,'add_food.html',context)
 
-#for deleting food given by the user
+#Deletando as comidas
 @login_required
 def delete_food(request,pk):
 	food_item = Food.objects.get(id=pk)
@@ -152,7 +152,7 @@ def delete_food(request,pk):
 	context = {'food':food_item,}
 	return render(request,'delete_food.html',context)
 
-#profile page of user
+#Pagina de profile do usuário
 @login_required
 def ProfilePage(request):
 	#getting the lastest profile object for the user
@@ -168,7 +168,7 @@ def ProfilePage(request):
 	else:
 		form = ProfileForm(instance=person)
 
-	#querying all records for the last seven days 
+	#Pegando as informações das comidas dos ultimos 7 dias
 	some_day_last_week = timezone.now().date() -timedelta(days=7)
 	records=Profile.objects.filter(date__gte=some_day_last_week,date__lt=timezone.now().date(),person_of=request.user)
 
